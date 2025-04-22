@@ -1,0 +1,11 @@
+CREATE DATABASE Banco;
+USE Banco;
+
+CREATE TABLE Cuentas (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    saldo DECIMAL (10, 2) NOT NULL
+);
+
+INSERT INTO Cuentas(saldo) VALUES (1000.00), (2000.00), (3000.00);
+
+SELECT * FROM Cuentas;
