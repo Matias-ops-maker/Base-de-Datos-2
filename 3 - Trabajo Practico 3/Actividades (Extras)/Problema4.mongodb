@@ -1,0 +1,90 @@
+use("tiendaOnline");
+
+// Crear un sistema de recomendación básico que, para un cliente dado, recomiende productos basándose en:
+// Productos de la misma categoría que ha comprado anteriormente
+// Productos populares (más vendidos) que no ha comprado aún
+// Productos mejor valorados en las categorías de su interés
+
+db.ventas.aggregate([
+    {
+        $lookup: {
+            from: "productos",
+            localField: "producto_id",
+            foreignField: "_id",
+            as: "producto"
+        }
+    },
+    {
+        $unwind: "$producto"
+    },
+    {
+        $project: {
+            _id: "$cliente.nombre",
+            productos: "$producto.nombre",
+            categorias: "$producto.categoria"
+        }
+    },
+    {
+        $group: {
+            _id: { nombre: "$_id", productos: "$productos", categorias: "$categorias" }
+        }
+    },
+    {
+        $group: {
+            _id: "$_id.nombre",
+            productos: { $push: "$_id.productos" },
+            categorias: { $push: "$_id.categorias" }
+        }
+    }
+]);
+
+use("tiendaOnline");
+
+db.ventas.aggregate([
+    {
+        $lookup: {
+            from: "productos",
+            localField: "producto_id",
+            foreignField: "_id",
+            as: "producto"
+        }
+    },
+    {
+        $unwind: "$producto"
+    },
+    {
+        $project: {
+            nombre: "$producto.nombre",
+            cantidad: { $sum: "$cantidad" }
+        }
+    },
+    {
+        $group: {
+            _id: "$nombre",
+            Cantidad_Vendidas: { $sum: "$cantidad" }
+        }
+    },
+    {
+        $sort: { Cantidad_Vendidas: -1 }
+    },
+    {
+        $limit: 3
+    }
+]);
+
+db.productos.aggregate([
+    {
+        $project: {
+            _id: 0,
+            categoria: "$categoria",
+            producto: "$nombre",
+            valoracion: 1
+        }
+    },
+    {
+        $group: {
+            _id: "$categoria",
+            productos: { $push: "$producto"}
+        }
+    }
+]);

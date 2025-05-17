@@ -1,0 +1,43 @@
+use("tiendaOnline");
+
+// Crear un pipeline que obtenga las ventas totales por mes, indicando también el producto más vendido de cada mes.
+
+db.ventas.aggregate([
+    {
+        $lookup: {
+            from: "productos",
+            localField: "producto_id",
+            foreignField: "_id",
+            as: "producto"
+        }
+    },
+    {
+        $unwind: "$producto"
+    },
+    {
+        $project: {
+            mes: { $month: "$fecha" },
+            total: 1,
+            nombre_producto: "$producto.nombre",
+            cantidad: 1
+        }
+    },
+    {
+        $group: {
+            _id: { mes: "$mes", nombre_producto: "$nombre_producto"},
+            Total_Mes: { $sum: "$total" },
+            Cantidad_Ventas_Producto: { $sum: "$cantidad"}
+        }
+    },
+    {
+        $sort: { Cantidad_Ventas_Producto: -1}
+    },
+    {
+        $group: {
+            _id: "$_id.mes",
+            Nombre_Producto: { $first: "$_id.nombre_producto"},
+            Total_Mes: { $sum: "$Total_Mes"},
+            Cantidad_Ventas_Producto: { $first: "$Cantidad_Ventas_Producto"}
+        }
+    }
+]);

@@ -1,0 +1,17 @@
+use("tiendaOnline");
+
+// Comprender y aplicar $unwind para trabajar con arrays.
+// Deconstruir el array de valoraciones de productos para obtener una lista plana donde cada documento contenga una valoración individual.
+// Luego, agrupar por puntuación y contar cuántas valoraciones hay de cada puntuación.
+
+
+db.productos.aggregate([
+    { $unwind: "$valoraciones" },
+    {
+        $group: {
+            _id: "$valoraciones.puntuacion",
+            "Cantidad Valoraciones": { $sum: 1 }
+        }
+    }
+]);
+

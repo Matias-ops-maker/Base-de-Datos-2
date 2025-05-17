@@ -1,0 +1,62 @@
+use("tiendaOnline");
+
+//Crear un informe de clientes que incluya:
+// Total gastado por cada cliente
+// Número de compras realizadas
+// Producto favorito (el que más ha comprado)
+// Categoría preferida (donde más ha gastado)
+// Fecha de primera y última compra
+
+db.ventas.aggregate([
+    {
+        $lookup: {
+            from: "productos",
+            localField: "producto_id",
+            foreignField: "_id",
+            as: "producto"
+        }
+    },
+    {
+        $unwind: "$producto"
+    },
+    {
+        $project: {
+            cliente: "$cliente.nombre",
+            producto_favorito: "$producto.nombre",
+            categoria_preferida: "$producto.categoria",
+            total_de_compra: 1,
+            fecha: 1
+        }
+    },
+    {
+        $sort: { fecha: 1 }
+    },
+    {
+        $group: {
+            _id: {
+                cliente: "$cliente",
+                producto_favorito: "$producto_favorito",
+                categoria_preferida: "$categoria_preferida"
+            },
+            Compras: { $sum: 1 },
+            primera_compra: { $first: "$fecha" },
+            ultima_compra: { $last: "$fecha" }
+        }
+    },
+    {
+        $sort: { primera_compra: 1 }
+    },
+    {
+        $group: {
+            _id: "$_id.cliente",
+            Producto_Favorito: { $first: "$_id.producto_favorito" },
+            Categoria_Preferida: { $first: "$_id.categoria_preferida" },
+            Total_De_Compras: { $sum: "$Compras" },
+            Primera_Compra: { $first: "$primera_compra" },
+            Ultima_Compra: { $last: "$ultima_compra" }
+        }
+    },
+    {
+        $sort: { Total_De_Compras: -1 }
+    }
+]);

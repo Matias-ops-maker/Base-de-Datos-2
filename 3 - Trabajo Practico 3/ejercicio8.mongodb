@@ -1,0 +1,37 @@
+use("tiendaOnline");
+
+// Top 3 productos más vendidos (por cantidad)
+// Para cada producto: nombre, categoría, total de unidades vendidas, monto total generado
+// Puntuación promedio en valoraciones
+
+db.ventas.aggregate([
+    {
+        $lookup: {
+            from: "productos",
+            localField: "producto_id",
+            foreignField: "_id",
+            as: "producto"
+        }
+    },
+    { $unwind: "$producto" },
+    {
+        $group: {
+            _id: "$producto.nombre",
+            Categoria: { $first: "$producto.categoria"},
+            Cantidad_Vendida: { $sum: "$cantidad" },
+            Monto_Generado: { $sum: "$total"},
+            Puntuacion: { $first: "$producto.valoraciones"}
+        }
+    },
+    {
+        $project: {
+            nombre: 1,
+            Categoria: 1,
+            Cantidad_Vendida: 1,
+            Monto_Generado: 1,
+            Puntuacion_Promedio: { $avg: "$Puntuacion.puntuacion"}
+        }
+    },
+    { $sort: { Cantidad_Vendida: -1 } },
+    { $limit: 3 }
+]);

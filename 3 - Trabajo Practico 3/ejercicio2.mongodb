@@ -1,0 +1,22 @@
+use("tiendaOnline");
+
+// Utilizar $group para agrupar documentos y aplicar operadores de acumulación.
+// Calcular el precio promedio, máximo y mínimo por categoría de producto.
+// Obtener el total de ventas por país del cliente, incluyendo la cantidad de transacciones y el monto total.
+
+db.productos.aggregate([
+    { $group: {
+        _id: "$categoria",
+        "Precio promedio": { $avg: "$precio"},
+        "Precio Minimo": { $min: "$precio"},
+        "Precio Maximo": { $max: "$precio"}
+    }}
+]);
+
+db.ventas.aggregate([
+    { $group: {
+        _id: "$cliente.pais",
+        cantidad: { $sum: 1},
+        "Monto Total": { $sum: "$total"}
+    }}
+]);
