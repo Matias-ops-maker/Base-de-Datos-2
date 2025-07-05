@@ -1,0 +1,33 @@
+// NODOS
+CREATE (carlos:Usuario {nombre: "Carlos"});
+CREATE (laura:Usuario {nombre: "Laura"});
+
+CREATE (garcia:Autor {nombre: "Garcia"});
+CREATE (perez:Autor {nombre: "Perez"});
+
+CREATE (catBD:Categoria {nombre: "Bases de Datos"});
+CREATE (catProg:Categoria {nombre: "Programación"});
+
+CREATE (libro1:Libro {titulo: "MongoDB Básico", ISBN: "111"});
+CREATE (libro2:Libro {titulo: "Neo4j Avanzado", ISBN: "222"});
+
+// RELACIONES
+CREATE (libro1)-[:ESCRITO_POR]->(garcia);
+CREATE (libro2)-[:ESCRITO_POR]->(perez);
+
+CREATE (libro1)-[:PERTENECE_A]->(catBD);
+CREATE (libro2)-[:PERTENECE_A]->(catProg);
+
+CREATE (carlos)-[:PRESTO]->(libro1);
+CREATE (laura)-[:PRESTO]->(libro2);
+
+// CONSULTAS
+MATCH (u:Usuario {nombre: "Carlos"})-[:PRESTO]->(l:Libro)
+RETURN l.titulo AS Libro, l.ISBN;
+
+MATCH (l:Libro)-[:PERTENECE_A]->(c:Categoria {nombre: "Bases de Datos"})
+MATCH (l)-[:ESCRITO_POR]->(a:Autor)
+RETURN DISTINCT a.nombre AS Autor;
+
+MATCH (u:Usuario)-[:PRESTO]->(l:Libro)
+RETURN u.nombre AS Usuario, count(l) AS CantidadPrestados;

@@ -1,0 +1,34 @@
+// NODOS
+CREATE (juan:Persona {nombre: "Juan"});
+CREATE (ana:Persona {nombre: "Ana"});
+CREATE (maria:Persona {nombre: "Maria"});
+
+CREATE (proyA:Proyecto {nombre: "Proyecto A"});
+CREATE (proyB:Proyecto {nombre: "Proyecto B"});
+
+CREATE (t1:Tarea {nombre: "Diseño", estado: "Pendiente"});
+CREATE (t2:Tarea {nombre: "Implementación", estado: "En Progreso"});
+CREATE (t3:Tarea {nombre: "Testing", estado: "Completada"});
+
+// RELACIONES
+CREATE (juan)-[:PARTICIPA_EN]->(proyA);
+CREATE (ana)-[:PARTICIPA_EN]->(proyA);
+CREATE (maria)-[:PARTICIPA_EN]->(proyB);
+
+CREATE (proyA)-[:TIENE]->(t1);
+CREATE (proyA)-[:TIENE]->(t2);
+CREATE (proyB)-[:TIENE]->(t3);
+
+CREATE (t1)-[:ASIGNADA_A]->(juan);
+CREATE (t2)-[:ASIGNADA_A]->(ana);
+CREATE (t3)-[:ASIGNADA_A]->(maria);
+
+// CONSULTAS
+MATCH (p:Proyecto)<-[:PARTICIPA_EN]-(per:Persona)
+RETURN p.nombre AS Proyecto, collect(per.nombre) AS Participantes;
+
+MATCH (t:Tarea)-[:ASIGNADA_A]->(per:Persona {nombre: "Juan"})
+RETURN t.nombre AS Tarea, t.estado AS Estado;
+
+MATCH (per:Persona {nombre: "Ana"})-[:PARTICIPA_EN]->(p:Proyecto)
+RETURN p.nombre AS Proyecto;

@@ -1,0 +1,31 @@
+// NODOS
+CREATE (sofia:Alumno {nombre: "Sofia"});
+CREATE (juan:Alumno {nombre: "Juan"});
+
+CREATE (martinez:Profesor {nombre: "Martinez"});
+CREATE (gomez:Profesor {nombre: "Gomez"});
+
+CREATE (bd:Curso {nombre: "Base de Datos"});
+CREATE (prog:Curso {nombre: "Programación"});
+
+// RELACIONES
+CREATE (bd)-[:DICTADO_POR]->(martinez);
+CREATE (prog)-[:DICTADO_POR]->(gomez);
+
+CREATE (sofia)-[:CURSA]->(bd);
+CREATE (sofia)-[:CURSA]->(prog);
+CREATE (juan)-[:CURSA]->(bd);
+
+CREATE (sofia)-[:TIENE_CALIFICACION {nota: 9}]->(bd);
+CREATE (sofia)-[:TIENE_CALIFICACION {nota: 8}]->(prog);
+CREATE (juan)-[:TIENE_CALIFICACION {nota: 7}]->(bd);
+
+// CONSULTAS
+MATCH (prof:Profesor {nombre: "Martinez"})<-[:DICTADO_POR]-(c:Curso)
+RETURN c.nombre AS Curso;
+
+MATCH (a:Alumno {nombre: "Sofia"})-[tc:TIENE_CALIFICACION]->(c:Curso)
+RETURN c.nombre AS Curso, tc.nota AS Nota;
+
+MATCH (a:Alumno)-[tc:TIENE_CALIFICACION]->(c:Curso)
+RETURN c.nombre AS Curso, avg(tc.nota) AS Promedio;

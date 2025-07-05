@@ -1,0 +1,33 @@
+// NODOS
+CREATE (lucia:Persona {nombre: "Lucia"});
+CREATE (pedro:Persona {nombre: "Pedro"});
+CREATE (sofia:Persona {nombre: "Sofia"});
+
+CREATE (techcorp:Empresa {nombre: "TechCorp"});
+CREATE (datasoft:Empresa {nombre: "DataSoft"});
+
+CREATE (py:Habilidad {nombre: "Python"});
+CREATE (sql:Habilidad {nombre: "SQL"});
+
+// RELACIONES
+CREATE (lucia)-[:TRABAJA_EN]->(techcorp);
+CREATE (pedro)-[:TRABAJA_EN]->(techcorp);
+CREATE (sofia)-[:TRABAJA_EN]->(datasoft);
+
+CREATE (lucia)-[:TIENE_HABILIDAD]->(py);
+CREATE (pedro)-[:TIENE_HABILIDAD]->(sql);
+CREATE (sofia)-[:TIENE_HABILIDAD]->(py);
+
+CREATE (lucia)-[:CONOCE]->(pedro);
+CREATE (pedro)-[:CONOCE]->(sofia);
+
+// CONSULTAS
+MATCH (p:Persona)-[:TRABAJA_EN]->(e:Empresa {nombre: "TechCorp"})
+RETURN p.nombre AS Persona;
+
+MATCH (p:Persona)-[:TIENE_HABILIDAD]->(h:Habilidad {nombre: "Python"})
+RETURN p.nombre AS Persona;
+
+MATCH (p:Persona {nombre: "Lucia"})-[:CONOCE]->(:Persona)-[:CONOCE]->(amigo2:Persona)
+WHERE amigo2.nombre <> "Lucia"
+RETURN DISTINCT amigo2.nombre AS ContactoDeSegundoGrado;
