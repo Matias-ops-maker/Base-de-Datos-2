@@ -1,0 +1,61 @@
+db.usuarios.insertMany([
+  { _id: 1, nombre: "Carlos" },
+  { _id: 2, nombre: "Laura" }
+]);
+
+db.autores.insertMany([
+  { _id: 1, nombre: "Garcia" },
+  { _id: 2, nombre: "Perez" }
+]);
+
+db.categorias.insertMany([
+  { _id: 1, nombre: "Bases de Datos" },
+  { _id: 2, nombre: "Programación" }
+]);
+
+db.libros.insertMany([
+  { _id: 1, titulo: "MongoDB Básico", ISBN: "111", autor_id: 1, categoria_id: 1 },
+  { _id: 2, titulo: "Neo4j Avanzado", ISBN: "222", autor_id: 2, categoria_id: 2 }
+]);
+
+db.prestamos.insertMany([
+  { usuario_id: 1, libro_id: 1 },
+  { usuario_id: 2, libro_id: 2 }
+]);
+
+// CONSULTAS
+db.prestamos.aggregate([
+  { $match: { usuario_id: 1 } },
+  { $lookup: {
+      from: "libros",
+      localField: "libro_id",
+      foreignField: "_id",
+      as: "libro"
+  }},
+  { $unwind: "$libro" },
+  { $project: { _id: 0, titulo: "$libro.titulo", ISBN: "$libro.ISBN" } }
+]);
+
+db.libros.aggregate([
+  { $match: { categoria_id: 1 } },
+  { $lookup: {
+      from: "autores",
+      localField: "autor_id",
+      foreignField: "_id",
+      as: "autor"
+  }},
+  { $unwind: "$autor" },
+  { $group: { _id: "$autor.nombre" } }
+]);
+
+db.prestamos.aggregate([
+  { $group: { _id: "$usuario_id", cantidad: { $sum: 1 } } },
+  { $lookup: {
+      from: "usuarios",
+      localField: "_id",
+      foreignField: "_id",
+      as: "usuario"
+  }},
+  { $unwind: "$usuario" },
+  { $project: { usuario: "$usuario.nombre", cantidad: 1 } }
+]);

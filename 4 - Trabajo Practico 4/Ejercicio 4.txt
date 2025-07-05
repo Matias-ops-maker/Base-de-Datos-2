@@ -1,0 +1,68 @@
+db.alumnos.insertMany([
+  { _id: 1, nombre: "Sofia" },
+  { _id: 2, nombre: "Juan" }
+]);
+
+db.profesores.insertMany([
+  { _id: 1, nombre: "Martinez" },
+  { _id: 2, nombre: "Gomez" }
+]);
+
+db.cursos.insertMany([
+  { _id: 1, nombre: "Base de Datos" },
+  { _id: 2, nombre: "Programación" }
+]);
+
+db.dictados.insertMany([
+  { curso_id: 1, profesor_id: 1 },
+  { curso_id: 2, profesor_id: 2 }
+]);
+
+db.cursadas.insertMany([
+  { alumno_id: 1, curso_id: 1 },
+  { alumno_id: 1, curso_id: 2 },
+  { alumno_id: 2, curso_id: 1 }
+]);
+
+db.calificaciones.insertMany([
+  { alumno_id: 1, curso_id: 1, nota: 9 },
+  { alumno_id: 1, curso_id: 2, nota: 8 },
+  { alumno_id: 2, curso_id: 1, nota: 7 }
+]);
+
+// CONSULTAS
+db.dictados.aggregate([
+  { $match: { profesor_id: 1 } },
+  { $lookup: {
+      from: "cursos",
+      localField: "curso_id",
+      foreignField: "_id",
+      as: "curso"
+  }},
+  { $unwind: "$curso" },
+  { $project: { nombre: "$curso.nombre" } }
+]);
+
+db.calificaciones.aggregate([
+  { $match: { alumno_id: 1 } },
+  { $lookup: {
+      from: "cursos",
+      localField: "curso_id",
+      foreignField: "_id",
+      as: "curso"
+  }},
+  { $unwind: "$curso" },
+  { $project: { curso: "$curso.nombre", nota: 1 } }
+]);
+
+db.calificaciones.aggregate([
+  { $group: { _id: "$curso_id", promedio: { $avg: "$nota" } } },
+  { $lookup: {
+      from: "cursos",
+      localField: "_id",
+      foreignField: "_id",
+      as: "curso"
+  }},
+  { $unwind: "$curso" },
+  { $project: { curso: "$curso.nombre", promedio: 1 } }
+]);
